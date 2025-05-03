@@ -1,51 +1,52 @@
+import {
+  AllRequests,
+  CreateGameRequestSchema,
+  Ctxt,
+  DestroyGameRequestSchema,
+  JoinGameRequestSchema,
+} from "@/types";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { formatZodError, successResponse, withErrorHandling } from "./utils";
 import { BadRequestError } from "./errors";
-import { z } from "zod";
-import { RPCRequest, RPCResponse } from "@/types";
+import { formatZodError, successResponse, withErrorHandling } from "./utils";
+import z from "zod";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { createGame, destroyGame, joinGame } from "./methods";
 
-export interface Ctxt {
-  rpcRequest: RPCRequest;
-}
-
-const buildRPCRequest = (event: APIGatewayProxyEvent): RPCRequest => {
+export const rpcHandler = async (event: APIGatewayProxyEvent) => {
   if (!event.body) {
     throw new BadRequestError("Missing request body");
   }
-  let body: any;
+  let body;
   try {
     body = JSON.parse(event.body);
   } catch (error) {
-    throw new BadRequestError("Invalid JSON body");
+    throw new BadRequestError("Invalid JSON format");
   }
   try {
-    const rpcRequest: RPCRequest = RPCRequest.parse(body);
-    return rpcRequest;
+    AllRequests.parse(body);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new BadRequestError(
-        `Invalid RPC request: ${formatZodError(error)}`
-      );
+      throw new BadRequestError(`Invalid params: ${formatZodError(error)}`);
     }
-    throw new BadRequestError("Invalid RPC request");
+    throw new BadRequestError("Internal error");
   }
-};
 
-const buildContext = (event: APIGatewayProxyEvent) => {
-  const rpcRequest = buildRPCRequest(event);
-  return { rpcRequest };
-};
+  const ddb = new DynamoDBClient({});
+  const ctxt: Ctxt = { sample: "context", ddb };
 
-export const rpcHandler = async (ctxt: Ctxt): Promise<RPCResponse> => {
-  return {
-    id: ctxt.rpcRequest.id,
-    error: {
-      code: 500,
-      message: "Not implemented",
-    },
-  };
+  if (CreateGameRequestSchema.safeParse(body).success) {
+    return await createGame(ctxt)(CreateGameRequestSchema.parse(body));
+  }
+  if (JoinGameRequestSchema.safeParse(body).success) {
+    return await joinGame(ctxt)(JoinGameRequestSchema.parse(body));
+  }
+  if (DestroyGameRequestSchema.safeParse(body).success) {
+    return await destroyGame(ctxt)(DestroyGameRequestSchema.parse(body));
+  }
+
+  throw new Error("No matching function found");
 };
 
 export const handler = withErrorHandling(async (event: APIGatewayProxyEvent) =>
-  successResponse(await rpcHandler(buildContext(event)))
+  successResponse(await rpcHandler(event))
 );

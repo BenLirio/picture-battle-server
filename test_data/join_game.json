@@ -1,0 +1,8 @@
+{
+  "method": "join_game",
+  "params": {
+    "gameId": "35720387-782d-4b1a-a9c7-3e7e8b688321",
+    "name": "Ben"
+  },
+  "id": 1
+}

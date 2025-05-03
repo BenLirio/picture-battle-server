@@ -11,6 +11,7 @@ provider:
   timeout: 10
   environment:
     NODE_ENV: ${self:provider.stage}
+    GAMES_TABLE_NAME: ${env:GAMES_TABLE_NAME, 'games-table'}
 
 # Serverless Framework v4 has native TypeScript support!
 # The "build" config is optional and can be customized if needed
