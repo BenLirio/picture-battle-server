@@ -1,0 +1,44 @@
+service: picture-battle-server
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 1024
+  timeout: 10
+  environment:
+    NODE_ENV: ${self:provider.stage}
+
+# Serverless Framework v4 has native TypeScript support!
+# The "build" config is optional and can be customized if needed
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: "node18"
+    define:
+      "process.env.NODE_ENV": "''"
+    platform: "node"
+
+functions:
+  hello:
+    handler: src/handlers/index.handler
+    events:
+      - http:
+          path: /index
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3002
