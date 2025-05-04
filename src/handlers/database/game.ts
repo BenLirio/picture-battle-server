@@ -1,7 +1,6 @@
 import { Ctxt } from "@/types";
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import z from "zod";
-import { v4 as uuidv4 } from "uuid";
 
 const PlayerSchema = z.object({
   name: z.string(),
@@ -12,7 +11,7 @@ export type Player = z.infer<typeof PlayerSchema>;
 const GameSchema = z.object({
   name: z.string(),
   id: z.string(),
-  state: z.enum(["WAITING_FOR_PLAYERS"]),
+  state: z.enum(["WAITING_FOR_PLAYERS", "STARTING"]),
   players: z.array(PlayerSchema),
 });
 export type Game = z.infer<typeof GameSchema>;
@@ -46,31 +45,7 @@ const updateGame =
     return game;
   };
 
-const createGame = (ctxt: Ctxt) => async (name: string) => {
-  const game: Game = {
-    name,
-    id: uuidv4(),
-    state: "WAITING_FOR_PLAYERS",
-    players: [],
-  };
-  await updateGame(ctxt)(game);
-  return game;
-};
-
-const createPlayerInGame =
-  (ctxt: Ctxt) => async (gameId: string, name: string) => {
-    const token = uuidv4();
-    const player: Player = {
-      name,
-      token,
-    };
-    const game: Game = await getGame(ctxt)(gameId);
-    game.players.push(player);
-    await updateGame(ctxt)(game);
-    return player;
-  };
-
 export const gameDDB = {
-  createGame,
-  createPlayerInGame,
+  updateGame,
+  getGame,
 };

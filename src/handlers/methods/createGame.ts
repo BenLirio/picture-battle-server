@@ -4,12 +4,19 @@ import {
   CreateGameResponse,
   Ctxt,
 } from "@/types";
-import { gameDDB } from "../database/game";
+import { Game, gameDDB } from "../database/game";
+import { v4 as uuidv4 } from "uuid";
 
 export const createGame: CreateGameFunctionCtxt =
   (ctxt: Ctxt) =>
   async ({ params: { name }, id }: CreateGameRequest) => {
-    const game = await gameDDB.createGame(ctxt)(name);
+    const game: Game = {
+      name,
+      id: uuidv4(),
+      state: "WAITING_FOR_PLAYERS",
+      players: [],
+    };
+    await gameDDB.updateGame(ctxt)(game);
     const response: CreateGameResponse = {
       id,
       result: {

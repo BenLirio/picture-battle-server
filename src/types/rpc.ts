@@ -6,22 +6,26 @@ const RPCErrorSchema = z.object({
 });
 export type RPCError = z.infer<typeof RPCErrorSchema>;
 
-const CommonRPCRequestSchema = z.object({
-  id: z.number(),
+const IDSchema = z.union([z.string(), z.number()]);
+
+const CommonRequestSchema = z.object({
+  id: IDSchema,
   method: z.string(),
 });
+export type CommonRequest = z.infer<typeof CommonRequestSchema>;
 
 const CommonResponseSchema = z.object({
-  id: z.number(),
+  id: IDSchema,
   error: RPCErrorSchema.optional(),
 });
+export type CommonResponse = z.infer<typeof CommonResponseSchema>;
 
 const buildRequestSchema = <T extends z.AnyZodObject>(
   method: string,
   params: T
 ) =>
   z.intersection(
-    CommonRPCRequestSchema,
+    CommonRequestSchema,
     z.object({
       method: z.literal(method),
       params,
@@ -36,13 +40,18 @@ const buildResponseSchema = <T extends z.AnyZodObject>(result: T) =>
   );
 
 /**
- * init_game
+ * create_game
  */
+export const CreateGameRequestBodyFields = {
+  name: z.string(),
+};
+export const CreateGameRequestBodySchema = z.object(
+  CreateGameRequestBodyFields
+);
+export type CreateGameRequestBody = z.infer<typeof CreateGameRequestBodySchema>;
 export const CreateGameRequestSchema = buildRequestSchema(
   "create_game",
-  z.object({
-    name: z.string(),
-  })
+  CreateGameRequestBodySchema
 );
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;
 export const CreateGameResponseSchema = buildResponseSchema(
@@ -60,12 +69,15 @@ export type CreateGameFunction = z.infer<typeof CreateGameFunctionSchema>;
 /**
  * init_game
  */
+export const JoinGameRequestBodyFields = {
+  gameId: z.string(),
+  name: z.string(),
+};
+export const JoinGameRequestBodySchema = z.object(JoinGameRequestBodyFields);
+export type JoinGameRequestBody = z.infer<typeof JoinGameRequestBodySchema>;
 export const JoinGameRequestSchema = buildRequestSchema(
   "join_game",
-  z.object({
-    gameId: z.string(),
-    name: z.string(),
-  })
+  JoinGameRequestBodySchema
 );
 export type JoinGameRequest = z.infer<typeof JoinGameRequestSchema>;
 export const JoinGameResponseSchema = buildResponseSchema(
@@ -83,11 +95,18 @@ export type JoinGameFunction = z.infer<typeof JoinGameFunctionSchema>;
 /**
  * destroy_game
  */
+export const DestroyGameRequestBodyFields = {
+  gameId: z.string(),
+};
+export const DestroyGameRequestBodySchema = z.object(
+  DestroyGameRequestBodyFields
+);
+export type DestroyGameRequestBody = z.infer<
+  typeof DestroyGameRequestBodySchema
+>;
 export const DestroyGameRequestSchema = buildRequestSchema(
   "destroy_game",
-  z.object({
-    gameId: z.string(),
-  })
+  DestroyGameRequestBodySchema
 );
 
 export type DestroyGameRequest = z.infer<typeof DestroyGameRequestSchema>;
