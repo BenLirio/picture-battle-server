@@ -3,13 +3,12 @@ import { gameDDB } from "../database/game";
 
 export const joinGame: JoinGameFunctionCtxt =
   (ctxt: Ctxt) =>
-  async ({ params: { gameId, name } }: JoinGameRequest) => {
-    const player = await gameDDB.createPlayerInGame(ctxt)(gameId, name);
+  async ({ params: { gameId, name }, id }: JoinGameRequest) => {
+    const { token } = await gameDDB.createPlayerInGame(ctxt)(gameId, name);
     return {
-      id: 1,
+      id,
       result: {
-        gameId,
-        ...player,
+        token,
       },
     };
   };

@@ -40,7 +40,9 @@ const buildResponseSchema = <T extends z.AnyZodObject>(result: T) =>
  */
 export const CreateGameRequestSchema = buildRequestSchema(
   "create_game",
-  z.object({})
+  z.object({
+    name: z.string(),
+  })
 );
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;
 export const CreateGameResponseSchema = buildResponseSchema(
@@ -68,8 +70,6 @@ export const JoinGameRequestSchema = buildRequestSchema(
 export type JoinGameRequest = z.infer<typeof JoinGameRequestSchema>;
 export const JoinGameResponseSchema = buildResponseSchema(
   z.object({
-    gameId: z.string(),
-    name: z.string(),
     token: z.string(),
   })
 );

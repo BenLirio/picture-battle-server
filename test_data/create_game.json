@@ -1,5 +1,7 @@
 {
   "method": "create_game",
-  "params": {},
+  "params": {
+    "name": "Ben's Game"
+  },
   "id": 1
 }

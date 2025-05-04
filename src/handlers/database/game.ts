@@ -10,66 +10,63 @@ const PlayerSchema = z.object({
 export type Player = z.infer<typeof PlayerSchema>;
 
 const GameSchema = z.object({
+  name: z.string(),
   id: z.string(),
   state: z.enum(["WAITING_FOR_PLAYERS"]),
   players: z.array(PlayerSchema),
 });
 export type Game = z.infer<typeof GameSchema>;
 
-const createGame =
+const getGame =
   ({ ddb }: Ctxt) =>
-  async () => {
-    const game: Game = {
-      id: uuidv4(),
-      state: "WAITING_FOR_PLAYERS",
-      players: [],
-    };
+  async (gameId: string): Promise<Game> => {
+    const command = new GetCommand({
+      TableName: process.env.GAMES_TABLE_NAME,
+      Key: { id: gameId },
+    });
+    const result = await ddb.send(command);
+    if (!result.Item) {
+      throw new Error(`Game with ID ${gameId} not found`);
+    }
+    const parsedGame = GameSchema.safeParse(result.Item);
+    if (!parsedGame.success) {
+      throw new Error(`Invalid game data: ${parsedGame.error.message}`);
+    }
+    return parsedGame.data;
+  };
+
+const updateGame =
+  ({ ddb }: Ctxt) =>
+  async (game: Game) => {
     const command = new PutCommand({
       TableName: process.env.GAMES_TABLE_NAME,
       Item: game,
     });
-    ddb.send(command);
+    await ddb.send(command);
     return game;
   };
 
+const createGame = (ctxt: Ctxt) => async (name: string) => {
+  const game: Game = {
+    name,
+    id: uuidv4(),
+    state: "WAITING_FOR_PLAYERS",
+    players: [],
+  };
+  await updateGame(ctxt)(game);
+  return game;
+};
+
 const createPlayerInGame =
-  ({ ddb }: Ctxt) =>
-  async (gameId: string, name: string) => {
+  (ctxt: Ctxt) => async (gameId: string, name: string) => {
     const token = uuidv4();
     const player: Player = {
       name,
       token,
     };
-
-    // Retrieve the game by gameId
-    const getCommand = new GetCommand({
-      TableName: process.env.GAMES_TABLE_NAME,
-      Key: { id: gameId },
-    });
-    const gameResult = await ddb.send(getCommand);
-
-    if (!gameResult.Item) {
-      throw new Error(`Game with ID ${gameId} not found`);
-    }
-
-    // Validate the retrieved game using zod
-    const parsedGame = GameSchema.safeParse(gameResult.Item);
-    if (!parsedGame.success) {
-      throw new Error(`Invalid game data: ${parsedGame.error.message}`);
-    }
-
-    const game: Game = parsedGame.data;
-
-    // Append the player to the players array
+    const game: Game = await getGame(ctxt)(gameId);
     game.players.push(player);
-
-    // Update the game in the database
-    const updateCommand = new PutCommand({
-      TableName: process.env.GAMES_TABLE_NAME,
-      Item: game,
-    });
-    await ddb.send(updateCommand);
-
+    await updateGame(ctxt)(game);
     return player;
   };
 

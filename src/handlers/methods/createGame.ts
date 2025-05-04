@@ -7,10 +7,11 @@ import {
 import { gameDDB } from "../database/game";
 
 export const createGame: CreateGameFunctionCtxt =
-  (ctxt: Ctxt) => async (request: CreateGameRequest) => {
-    const game = await gameDDB.createGame(ctxt)();
+  (ctxt: Ctxt) =>
+  async ({ params: { name }, id }: CreateGameRequest) => {
+    const game = await gameDDB.createGame(ctxt)(name);
     const response: CreateGameResponse = {
-      id: request.id,
+      id,
       result: {
         gameId: game.id,
       },
