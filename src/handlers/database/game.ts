@@ -4,6 +4,7 @@ import z from "zod";
 
 const PlayerSchema = z.object({
   name: z.string(),
+  id: z.string(),
   token: z.string(),
 });
 export type Player = z.infer<typeof PlayerSchema>;

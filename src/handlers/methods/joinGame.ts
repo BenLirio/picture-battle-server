@@ -34,9 +34,11 @@ export const joinGame: JoinGameFunctionCtxt =
   (ctxt: Ctxt) =>
   async ({ params: { gameId, name }, id }: JoinGameRequest) => {
     const token = uuidv4();
+    const playerId = uuidv4();
     const player: Player = {
       name,
       token,
+      id: playerId,
     };
     const existingGame: Game = await gameDDB.getGame(ctxt)(gameId);
     const error = validatePlayerCanJoinGame(existingGame);
@@ -53,6 +55,7 @@ export const joinGame: JoinGameFunctionCtxt =
       id,
       result: {
         token,
+        id: playerId,
       },
     };
   };

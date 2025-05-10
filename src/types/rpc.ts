@@ -82,6 +82,7 @@ export const JoinGameRequestSchema = buildRequestSchema(
 export type JoinGameRequest = z.infer<typeof JoinGameRequestSchema>;
 export const JoinGameResponseSchema = buildResponseSchema(
   z.object({
+    id: z.string(),
     token: z.string(),
   })
 );

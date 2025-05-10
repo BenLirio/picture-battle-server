@@ -40,14 +40,18 @@ describe("joinGame", () => {
     expect(mockUpdateGame).toHaveBeenCalledWith(ctxt);
     expect(updateGameFunc).toHaveBeenCalledWith(
       expect.objectContaining({
-        players: [{ name: "Alice", token }],
+        players: [{ name: "Alice", token, id: expect.any(String) }],
         state: "WAITING_FOR_PLAYERS",
       } as Partial<Game>)
     );
   });
 
   it("adds a second player and transitions state to STARTING when game is full", async () => {
-    const existingPlayer: Player = { name: "Bob", token: "bob-token" };
+    const existingPlayer: Player = {
+      name: "Bob",
+      token: "bob-token",
+      id: "bob-id",
+    };
     const initialGame: Game = {
       id: "game123",
       name: "Test Game",
@@ -73,7 +77,10 @@ describe("joinGame", () => {
     expect(getGameFunc).toHaveBeenCalledWith("game123");
     expect(updateGameFunc).toHaveBeenCalledWith(
       expect.objectContaining({
-        players: [existingPlayer, { name: "Carol", token }],
+        players: [
+          existingPlayer,
+          { name: "Carol", token, id: expect.any(String) },
+        ],
         state: "STARTING",
       } as Partial<Game>)
     );
@@ -105,8 +112,8 @@ describe("joinGame", () => {
 
   it("returns an error when attempting to join a full game", async () => {
     const existingPlayers: Player[] = [
-      { name: "Eve", token: "eve-token" },
-      { name: "Frank", token: "frank-token" },
+      { name: "Eve", token: "eve-token", id: "eve-id" },
+      { name: "Frank", token: "frank-token", id: "frank-id" },
     ];
     const initialGame: Game = {
       id: "game123",
