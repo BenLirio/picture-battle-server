@@ -67,7 +67,7 @@ export const CreateGameFunctionSchema = z
 export type CreateGameFunction = z.infer<typeof CreateGameFunctionSchema>;
 
 /**
- * init_game
+ * join_game
  */
 export const JoinGameRequestBodyFields = {
   gameId: z.string(),
@@ -92,6 +92,40 @@ export const JoinGameFunctionSchema = z
   .args(JoinGameRequestSchema)
   .returns(z.promise(JoinGameResponseSchema));
 export type JoinGameFunction = z.infer<typeof JoinGameFunctionSchema>;
+
+/**
+ * select_character
+ */
+export const SelectCharacterRequestBodyFields = {
+  gameId: z.string(),
+  token: z.string(),
+  playerId: z.string(),
+  character: z.string(),
+};
+export const SelectCharacterRequestBodySchema = z.object(
+  SelectCharacterRequestBodyFields
+);
+export type SelectCharacterRequestBody = z.infer<
+  typeof SelectCharacterRequestBodySchema
+>;
+export const SelectCharacterRequestSchema = buildRequestSchema(
+  "select_character",
+  SelectCharacterRequestBodySchema
+);
+export type SelectCharacterRequest = z.infer<
+  typeof SelectCharacterRequestSchema
+>;
+export const SelectCharacterResponseSchema = buildResponseSchema(z.object({}));
+export type SelectCharacterResponse = z.infer<
+  typeof SelectCharacterResponseSchema
+>;
+export const SelectCharacterFunctionSchema = z
+  .function()
+  .args(SelectCharacterRequestSchema)
+  .returns(z.promise(SelectCharacterResponseSchema));
+export type SelectCharacterFunction = z.infer<
+  typeof SelectCharacterFunctionSchema
+>;
 
 /**
  * destroy_game

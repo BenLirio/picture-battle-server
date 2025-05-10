@@ -6,13 +6,14 @@ const PlayerSchema = z.object({
   name: z.string(),
   id: z.string(),
   token: z.string(),
+  character: z.string().optional(),
 });
 export type Player = z.infer<typeof PlayerSchema>;
 
 const GameSchema = z.object({
   name: z.string(),
   id: z.string(),
-  state: z.enum(["WAITING_FOR_PLAYERS", "SELECTING_CHARACTERS"]),
+  state: z.enum(["WAITING_FOR_PLAYERS", "SELECTING_CHARACTERS", "GAME_LOOP"]),
   players: z.array(PlayerSchema),
 });
 export type Game = z.infer<typeof GameSchema>;

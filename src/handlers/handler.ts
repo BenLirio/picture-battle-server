@@ -4,13 +4,14 @@ import {
   Ctxt,
   DestroyGameRequestSchema,
   JoinGameRequestSchema,
+  SelectCharacterRequestSchema,
 } from "@/types";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { BadRequestError } from "./errors";
 import { formatZodError, successResponse, withErrorHandling } from "./utils";
 import z from "zod";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { createGame, destroyGame, joinGame } from "./methods";
+import { createGame, destroyGame, joinGame, selectCharacter } from "./methods";
 
 export const rpcHandler = async (event: APIGatewayProxyEvent) => {
   if (!event.body) {
@@ -42,6 +43,11 @@ export const rpcHandler = async (event: APIGatewayProxyEvent) => {
   }
   if (DestroyGameRequestSchema.safeParse(body).success) {
     return await destroyGame(ctxt)(DestroyGameRequestSchema.parse(body));
+  }
+  if (SelectCharacterRequestSchema.safeParse(body).success) {
+    return await selectCharacter(ctxt)(
+      SelectCharacterRequestSchema.parse(body)
+    );
   }
 
   throw new Error("No matching function found");
