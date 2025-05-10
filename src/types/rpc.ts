@@ -209,6 +209,35 @@ export const DoActionFunctionSchema = z
 export type DoActionFunction = z.infer<typeof DoActionFunctionSchema>;
 
 /**
+ * list_games
+ */
+export const GAME_STATES = [
+  "WAITING_FOR_PLAYERS",
+  "SELECTING_CHARACTERS",
+  "GAME_LOOP",
+  "GAME_OVER",
+] as const;
+export type GameState = (typeof GAME_STATES)[number];
+export const ListGamesRequestSchema = buildRequestSchema(
+  "list_games",
+  z.object({
+    stateFilter: z.enum(GAME_STATES).optional(),
+  })
+);
+export type ListGamesRequest = z.infer<typeof ListGamesRequestSchema>;
+export const ListGamesResponseSchema = buildResponseSchema(
+  z.object({
+    games: z.array(z.object({ id: z.string(), state: z.enum(GAME_STATES) })),
+  })
+);
+export type ListGamesResponse = z.infer<typeof ListGamesResponseSchema>;
+export const ListGamesFunctionSchema = z
+  .function()
+  .args(ListGamesRequestSchema)
+  .returns(z.promise(ListGamesResponseSchema));
+export type ListGamesFunction = z.infer<typeof ListGamesFunctionSchema>;
+
+/**
  * All Functions
  */
 export const AllRequests = z.union([
@@ -217,4 +246,5 @@ export const AllRequests = z.union([
   DestroyGameRequestSchema,
   SelectCharacterRequestSchema,
   IsTurnRequestSchema,
+  ListGamesRequestSchema,
 ]);

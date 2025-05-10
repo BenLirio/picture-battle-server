@@ -4,6 +4,7 @@ import {
   DoActionFunction,
   IsTurnFunction,
   JoinGameFunction,
+  ListGamesFunction,
   SelectCharacterFunction,
 } from "./rpc";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -26,3 +27,5 @@ export type SelectCharacterFunctionCtxt = (
 export type IsTurnFunctionCtxt = (ctxt: Ctxt) => IsTurnFunction;
 
 export type DoActionFunctionCtxt = (ctxt: Ctxt) => DoActionFunction;
+
+export type ListGamesFunctionCtxt = (ctxt: Ctxt) => ListGamesFunction;

@@ -1,5 +1,5 @@
-import { Ctxt } from "@/types";
-import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { Ctxt, GAME_STATES, GameState } from "@/types";
+import { PutCommand, GetCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import z from "zod";
 
 const PlayerSchema = z.object({
@@ -21,12 +21,7 @@ export type Player = z.infer<typeof PlayerSchema>;
 const GameSchema = z.object({
   name: z.string(),
   id: z.string(),
-  state: z.enum([
-    "WAITING_FOR_PLAYERS",
-    "SELECTING_CHARACTERS",
-    "GAME_LOOP",
-    "GAME_OVER",
-  ]),
+  state: z.enum(GAME_STATES),
   players: z.array(PlayerSchema),
 });
 export type Game = z.infer<typeof GameSchema>;
@@ -60,7 +55,29 @@ const updateGame =
     return game;
   };
 
+const listGames =
+  ({ ddb }: Ctxt) =>
+  async (stateFilter?: string): Promise<{ id: string; state: GameState }[]> => {
+    const params: any = {
+      TableName: process.env.GAMES_TABLE_NAME,
+      ProjectionExpression: "id, #s",
+      ExpressionAttributeNames: { "#s": "state" },
+    };
+    if (stateFilter) {
+      params.FilterExpression = "#s = :state";
+      params.ExpressionAttributeValues = { ":state": stateFilter };
+    }
+    const command = new ScanCommand(params);
+    const result = await ddb.send(command);
+    const items = result.Items || [];
+    return items.map((item) => ({
+      id: item.id,
+      state: item.state as GameState,
+    }));
+  };
+
 export const gameDDB = {
   updateGame,
   getGame,
+  listGames,
 };
