@@ -158,10 +158,39 @@ export const DestroyGameFunctionSchema = z
 export type DestroyGameFunction = z.infer<typeof DestroyGameFunctionSchema>;
 
 /**
+ * is_turn
+ */
+export const IsTurnRequestBodyFields = {
+  gameId: z.string(),
+  token: z.string(),
+  playerId: z.string(),
+};
+export const IsTurnRequestBodySchema = z.object(IsTurnRequestBodyFields);
+export type IsTurnRequestBody = z.infer<typeof IsTurnRequestBodySchema>;
+export const IsTurnRequestSchema = buildRequestSchema(
+  "is_turn",
+  IsTurnRequestBodySchema
+);
+export type IsTurnRequest = z.infer<typeof IsTurnRequestSchema>;
+export const IsTurnResponseSchema = buildResponseSchema(
+  z.object({
+    isTurn: z.boolean(),
+  })
+);
+export type IsTurnResponse = z.infer<typeof IsTurnResponseSchema>;
+export const IsTurnFunctionSchema = z
+  .function()
+  .args(IsTurnRequestSchema)
+  .returns(z.promise(IsTurnResponseSchema));
+export type IsTurnFunction = z.infer<typeof IsTurnFunctionSchema>;
+
+/**
  * All Functions
  */
 export const AllRequests = z.union([
   CreateGameRequestSchema,
   JoinGameRequestSchema,
   DestroyGameRequestSchema,
+  SelectCharacterRequestSchema,
+  IsTurnRequestSchema,
 ]);

@@ -1,6 +1,7 @@
 import {
   CreateGameFunction,
   DestroyGameFunction,
+  IsTurnFunction,
   JoinGameFunction,
   SelectCharacterFunction,
 } from "./rpc";
@@ -20,3 +21,5 @@ export type DestroyGameFunctionCtxt = (ctxt: Ctxt) => DestroyGameFunction;
 export type SelectCharacterFunctionCtxt = (
   ctxt: Ctxt
 ) => SelectCharacterFunction;
+
+export type IsTurnFunctionCtxt = (ctxt: Ctxt) => IsTurnFunction;
