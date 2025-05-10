@@ -7,6 +7,7 @@
     "deploy": "serverless deploy",
     "deploy:prod": "serverless deploy --stage production",
     "start:dev": "serverless offline start",
+    "test": "jest",
     "lint": "eslint . --ext .ts"
   },
   "keywords": [],

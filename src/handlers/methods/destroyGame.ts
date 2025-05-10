@@ -1,7 +1,7 @@
 import { Ctxt, DestroyGameFunctionCtxt, DestroyGameRequest } from "@/types";
 
 export const destroyGame: DestroyGameFunctionCtxt =
-  (ctxt: Ctxt) => async (request: DestroyGameRequest) => {
+  (_ctxt: Ctxt) => async (request: DestroyGameRequest) => {
     return {
       id: request.id,
       error: {
