@@ -53,6 +53,15 @@ export const doAction: DoActionFunctionCtxt =
         .forEach((p) => {
           p.state = "LOST";
         });
+    } else {
+      const indexOfPlayer = game.players.findIndex(({ id }) => id === playerId);
+      game.players.forEach((p, index) => {
+        if (index === indexOfPlayer) {
+          p.state = "WAITING_FOR_TURN";
+        } else if (index === (indexOfPlayer + 1) % game.players.length) {
+          p.state = "THIS_PLAYERS_TURN";
+        }
+      });
     }
     return {
       id,

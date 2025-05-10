@@ -247,4 +247,5 @@ export const AllRequests = z.union([
   SelectCharacterRequestSchema,
   IsTurnRequestSchema,
   ListGamesRequestSchema,
+  DoActionRequestSchema,
 ]);

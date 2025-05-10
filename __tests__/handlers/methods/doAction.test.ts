@@ -89,10 +89,13 @@ describe("doAction", () => {
     });
   });
 
-  it("returns success for non-win action without changing game", async () => {
+  it("returns success for non-win action and switches turn to next player", async () => {
     const fakeGame = {
       state: "GAME_LOOP",
-      players: [{ id: "p1", token: "token1", state: "THIS_PLAYERS_TURN" }],
+      players: [
+        { id: "p1", token: "token1", state: "THIS_PLAYERS_TURN" },
+        { id: "p2", token: "token2", state: "WAITING" },
+      ],
     };
     (gameDDB.getGame as jest.Mock).mockReturnValueOnce(() =>
       Promise.resolve(fakeGame)
@@ -104,7 +107,8 @@ describe("doAction", () => {
     });
     expect(response).toEqual({ id: "5", result: {} });
     expect(fakeGame.state).toBe("GAME_LOOP");
-    expect(fakeGame.players[0].state).toBe("THIS_PLAYERS_TURN");
+    expect(fakeGame.players[0].state).toBe("WAITING_FOR_TURN");
+    expect(fakeGame.players[1].state).toBe("THIS_PLAYERS_TURN");
   });
 
   it("handles 'win' action correctly", async () => {

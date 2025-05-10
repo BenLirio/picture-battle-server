@@ -60,7 +60,6 @@ export const rpcHandler = async (event: APIGatewayProxyEvent) => {
       SelectCharacterRequestSchema.parse(body)
     );
   }
-
   if (IsTurnRequestSchema.safeParse(body).success) {
     return await isTurn(ctxt)(IsTurnRequestSchema.parse(body));
   }

@@ -1,0 +1,10 @@
+{
+  "id": "1",
+  "method": "do_action",
+  "params": {
+    "gameId": "915b9634-6190-43a0-9e99-310f823252c6",
+    "token": "33887ec7-9d52-44a7-9215-24d9c44353b5",
+    "playerId": "edad75b6-0431-46f3-ba2d-314fe16ad994",
+    "action": "nothing much"
+  }
+}
