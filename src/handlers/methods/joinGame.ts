@@ -25,7 +25,7 @@ const addPlayerToGame = (existingGame: Game, player: Player): Game => {
   const game = structuredClone(existingGame);
   game.players.push(player);
   if (game.players.length === MAX_PLAYERS_PER_GAME) {
-    game.state = "STARTING";
+    game.state = "SELECTING_CHARACTERS";
   }
   return game;
 };

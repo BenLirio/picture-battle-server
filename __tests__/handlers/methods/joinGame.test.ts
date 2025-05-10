@@ -46,7 +46,7 @@ describe("joinGame", () => {
     );
   });
 
-  it("adds a second player and transitions state to STARTING when game is full", async () => {
+  it("adds a second player and transitions state to SELECTING_CHARACTERS when game is full", async () => {
     const existingPlayer: Player = {
       name: "Bob",
       token: "bob-token",
@@ -81,7 +81,7 @@ describe("joinGame", () => {
           existingPlayer,
           { name: "Carol", token, id: expect.any(String) },
         ],
-        state: "STARTING",
+        state: "SELECTING_CHARACTERS",
       } as Partial<Game>)
     );
   });
@@ -90,7 +90,7 @@ describe("joinGame", () => {
     const initialGame: Game = {
       id: "game123",
       name: "Test Game",
-      state: "STARTING",
+      state: "SELECTING_CHARACTERS",
       players: [],
     };
     const getGameFunc = jest.fn().mockResolvedValue(initialGame);
