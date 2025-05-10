@@ -41,11 +41,18 @@ export const selectCharacter: SelectCharacterFunctionCtxt =
       };
     }
     player.character = character;
+    player.state = "SELECTED_CHARACTER";
     if (
-      game.players.length ===
-      game.players.filter(({ character }) => character !== undefined).length
+      game.players.find(({ state }) => state !== "SELECTED_CHARACTER") ===
+      undefined
     ) {
       game.state = "GAME_LOOP";
+      game.players.forEach((player) => {
+        player.state = "WAITING_FOR_TURN";
+      });
+      const numPlayers = game.players.length;
+      const randomPlayerIndex = Math.floor(Math.random() * numPlayers);
+      game.players[randomPlayerIndex].state = "THIS_PLAYERS_TURN";
     }
     await gameDDB.updateGame(ctxt)(game);
 

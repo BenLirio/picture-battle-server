@@ -18,8 +18,18 @@ describe("selectCharacter", () => {
       name: "Test Game",
       state: "SELECTING_CHARACTERS",
       players: [
-        { id: "p1", name: "Alice", token: "token1" },
-        { id: "p2", name: "Bob", token: "token2" },
+        {
+          id: "p1",
+          name: "Alice",
+          token: "token1",
+          state: "SELECTING_CHARACTER",
+        },
+        {
+          id: "p2",
+          name: "Bob",
+          token: "token2",
+          state: "SELECTING_CHARACTER",
+        },
       ],
     };
     const getGameFunc = jest.fn().mockResolvedValue(initialGame);
@@ -48,7 +58,11 @@ describe("selectCharacter", () => {
       expect.objectContaining({
         state: "SELECTING_CHARACTERS",
         players: expect.arrayContaining([
-          expect.objectContaining({ id: "p1", character: "X" }),
+          expect.objectContaining({
+            id: "p1",
+            character: "X",
+            state: "SELECTED_CHARACTER",
+          }),
         ]),
       })
     );
@@ -59,7 +73,14 @@ describe("selectCharacter", () => {
       id: "game2",
       name: "Test Game",
       state: "SELECTING_CHARACTERS",
-      players: [{ id: "p1", name: "Alice", token: "token1" }],
+      players: [
+        {
+          id: "p1",
+          name: "Alice",
+          token: "token1",
+          state: "SELECTING_CHARACTER",
+        },
+      ],
     };
     const getGameFunc = jest.fn().mockResolvedValue(initialGame);
     mockGetGame.mockReturnValue(getGameFunc);
@@ -84,7 +105,11 @@ describe("selectCharacter", () => {
       expect.objectContaining({
         state: "GAME_LOOP",
         players: expect.arrayContaining([
-          expect.objectContaining({ id: "p1", character: "Y" }),
+          expect.objectContaining({
+            id: "p1",
+            character: "Y",
+            state: "THIS_PLAYERS_TURN",
+          }),
         ]),
       })
     );
@@ -119,7 +144,14 @@ describe("selectCharacter", () => {
       id: "game4",
       name: "Test Game",
       state: "SELECTING_CHARACTERS",
-      players: [{ id: "p1", name: "Alice", token: "good-token" }],
+      players: [
+        {
+          id: "p1",
+          name: "Alice",
+          token: "good-token",
+          state: "SELECTING_CHARACTER",
+        },
+      ],
     };
     mockGetGame.mockReturnValue(jest.fn().mockResolvedValue(initialGame));
 
@@ -165,5 +197,56 @@ describe("selectCharacter", () => {
       message: `Player p1 has already selected a character`,
     });
     expect(mockUpdateGame).not.toHaveBeenCalled();
+  });
+
+  it("transitions with multiple players, sets all to WAITING_FOR_TURN and one to THIS_PLAYERS_TURN", async () => {
+    const initialGame: Game = {
+      id: "game6",
+      name: "Test Game",
+      state: "SELECTING_CHARACTERS",
+      players: [
+        {
+          id: "p1",
+          name: "Alice",
+          token: "t1",
+          state: "SELECTED_CHARACTER",
+          character: "X",
+        },
+        {
+          id: "p2",
+          name: "Bob",
+          token: "t2",
+          state: "SELECTED_CHARACTER",
+          character: "Y",
+        },
+        { id: "p3", name: "Carol", token: "t3", state: "SELECTING_CHARACTER" },
+      ],
+    } as any;
+    mockGetGame.mockReturnValue(jest.fn().mockResolvedValue(initialGame));
+    const updateGameFunc = jest.fn().mockResolvedValue(undefined);
+    mockUpdateGame.mockReturnValue(updateGameFunc);
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.5);
+
+    const handler = selectCharacter(ctxt);
+    const response = await handler({
+      method: "select_character",
+      id: 6,
+      params: { character: "Z", gameId: "game6", playerId: "p3", token: "t3" },
+    });
+
+    expect(response.id).toBe(6);
+    expect(response.result).toEqual({});
+    expect(updateGameFunc).toHaveBeenCalledWith(
+      expect.objectContaining({ state: "GAME_LOOP" })
+    );
+
+    const updatedGameArg = updateGameFunc.mock.calls[0][0];
+    expect(
+      updatedGameArg.players.filter((p: any) => p.state === "THIS_PLAYERS_TURN")
+    ).toHaveLength(1);
+    expect(
+      updatedGameArg.players.filter((p: any) => p.state === "WAITING_FOR_TURN")
+    ).toHaveLength(2);
+    randomSpy.mockRestore();
   });
 });

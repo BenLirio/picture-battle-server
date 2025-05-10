@@ -7,6 +7,12 @@ const PlayerSchema = z.object({
   id: z.string(),
   token: z.string(),
   character: z.string().optional(),
+  state: z.enum([
+    "SELECTING_CHARACTER",
+    "SELECTED_CHARACTER",
+    "THIS_PLAYERS_TURN",
+    "WAITING_FOR_TURN",
+  ]),
 });
 export type Player = z.infer<typeof PlayerSchema>;
 

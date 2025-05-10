@@ -39,6 +39,7 @@ export const joinGame: JoinGameFunctionCtxt =
       name,
       token,
       id: playerId,
+      state: "SELECTING_CHARACTER",
     };
     const existingGame: Game = await gameDDB.getGame(ctxt)(gameId);
     const error = validatePlayerCanJoinGame(existingGame);
