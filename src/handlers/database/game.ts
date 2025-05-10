@@ -1,4 +1,4 @@
-import { Ctxt, GAME_STATES, GameState } from "@/types";
+import { Ctxt, GAME_STATES } from "@/types";
 import { PutCommand, GetCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import z from "zod";
 
@@ -26,6 +26,13 @@ const GameSchema = z.object({
 });
 export type Game = z.infer<typeof GameSchema>;
 
+// Define schema for listGames output
+const ListGameSchema = z.object({
+  id: z.string(),
+  state: z.enum(GAME_STATES),
+});
+export type ListGame = z.infer<typeof ListGameSchema>;
+
 const getGame =
   ({ ddb }: Ctxt) =>
   async (gameId: string): Promise<Game> => {
@@ -46,34 +53,47 @@ const getGame =
 
 const updateGame =
   ({ ddb }: Ctxt) =>
-  async (game: Game) => {
+  async (game: unknown) => {
+    // Validate input game against schema
+    const parsedInput = GameSchema.safeParse(game);
+    if (!parsedInput.success) {
+      throw new Error(`Invalid game input: ${parsedInput.error.message}`);
+    }
+    const validGame = parsedInput.data;
     const command = new PutCommand({
       TableName: process.env.GAMES_TABLE_NAME,
-      Item: game,
+      Item: validGame,
     });
     await ddb.send(command);
-    return game;
+    return validGame;
   };
 
 const listGames =
   ({ ddb }: Ctxt) =>
-  async (stateFilter?: string): Promise<{ id: string; state: GameState }[]> => {
+  async (stateFilter?: unknown): Promise<ListGame[]> => {
     const params: any = {
       TableName: process.env.GAMES_TABLE_NAME,
       ProjectionExpression: "id, #s",
       ExpressionAttributeNames: { "#s": "state" },
     };
-    if (stateFilter) {
+    if (stateFilter !== undefined) {
+      // Validate filter value
+      const parsedFilter = z.enum(GAME_STATES).safeParse(stateFilter);
+      if (!parsedFilter.success) {
+        throw new Error(`Invalid state filter: ${parsedFilter.error.message}`);
+      }
       params.FilterExpression = "#s = :state";
-      params.ExpressionAttributeValues = { ":state": stateFilter };
+      params.ExpressionAttributeValues = { ":state": parsedFilter.data };
     }
     const command = new ScanCommand(params);
     const result = await ddb.send(command);
     const items = result.Items || [];
-    return items.map((item) => ({
-      id: item.id,
-      state: item.state as GameState,
-    }));
+    // Validate fetched items
+    const parsedList = z.array(ListGameSchema).safeParse(items);
+    if (!parsedList.success) {
+      throw new Error(`Invalid game list data: ${parsedList.error.message}`);
+    }
+    return parsedList.data;
   };
 
 export const gameDDB = {

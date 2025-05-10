@@ -73,6 +73,10 @@ export const rpcHandler = async (event: APIGatewayProxyEvent) => {
   throw new Error("No matching function found");
 };
 
-export const handler = withErrorHandling(async (event: APIGatewayProxyEvent) =>
-  successResponse(await rpcHandler(event))
+export const handler = withErrorHandling(
+  async (event: APIGatewayProxyEvent) => {
+    const rpcResponse = await rpcHandler(event);
+    console.log("RPC Response:", JSON.stringify(rpcResponse, null, 2));
+    return successResponse(rpcResponse);
+  }
 );
