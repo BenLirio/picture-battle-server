@@ -185,6 +185,30 @@ export const IsTurnFunctionSchema = z
 export type IsTurnFunction = z.infer<typeof IsTurnFunctionSchema>;
 
 /**
+ * do_action
+ */
+export const DoActionRequestBodyFields = {
+  gameId: z.string(),
+  token: z.string(),
+  playerId: z.string(),
+  action: z.string(),
+};
+export const DoActionRequestBodySchema = z.object(DoActionRequestBodyFields);
+export type DoActionRequestBody = z.infer<typeof DoActionRequestBodySchema>;
+export const DoActionRequestSchema = buildRequestSchema(
+  "do_action",
+  DoActionRequestBodySchema
+);
+export type DoActionRequest = z.infer<typeof DoActionRequestSchema>;
+export const DoActionResponseSchema = buildResponseSchema(z.object({}));
+export type DoActionResponse = z.infer<typeof DoActionResponseSchema>;
+export const DoActionFunctionSchema = z
+  .function()
+  .args(DoActionRequestSchema)
+  .returns(z.promise(DoActionResponseSchema));
+export type DoActionFunction = z.infer<typeof DoActionFunctionSchema>;
+
+/**
  * All Functions
  */
 export const AllRequests = z.union([

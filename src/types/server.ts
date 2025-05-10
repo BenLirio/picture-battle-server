@@ -1,6 +1,7 @@
 import {
   CreateGameFunction,
   DestroyGameFunction,
+  DoActionFunction,
   IsTurnFunction,
   JoinGameFunction,
   SelectCharacterFunction,
@@ -23,3 +24,5 @@ export type SelectCharacterFunctionCtxt = (
 ) => SelectCharacterFunction;
 
 export type IsTurnFunctionCtxt = (ctxt: Ctxt) => IsTurnFunction;
+
+export type DoActionFunctionCtxt = (ctxt: Ctxt) => DoActionFunction;
